@@ -5,6 +5,10 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const startBtn = document.querySelector('button[data-start]');
 const dateTimePicker = document.querySelector('#datetime-picker');
+const daysContent = document.querySelector('span[data-days]');
+const hoursContent = document.querySelector('span[data-hours]');
+const minutesContent = document.querySelector('span[data-minutes]');
+const secondsContent = document.querySelector('span[data-seconds]');
 
 startBtn.setAttribute('disabled', '');
 
@@ -17,13 +21,18 @@ const options = {
 
   onClose(selectedDates) {
     const selectedTime = selectedDates[0].getTime();
-    let currentTime = options.defaultDate.getTime();
-    if (selectedTime < currentTime) {
+
+    let initialTime = options.defaultDate.getTime();
+    if (selectedTime < initialTime) {
       alert('Please choose a date in the future');
     } else {
       startBtn.removeAttribute('disabled');
+      setInterval(() => {
+        let currentDate = new Date();
+        let currentTime = currentDate.getTime();
+        convertMs(selectedTime - currentTime);
+      }, 1000);
     }
-    console.log(convertMs(selectedTime - currentTime));
   },
 };
 
@@ -48,8 +57,11 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+function addLeadingZero(value) {}
 
 //Натисканням на кнопку «Start» починається відлік часу до обраної дати
 //з моменту натискання.
+
+// const str1 = '5';
+
+// console.log(str1.padStart(2, '0'));
