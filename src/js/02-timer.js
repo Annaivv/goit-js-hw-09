@@ -2,9 +2,9 @@
 //Бібліотека flatpickr для вибору кінцевої дати й часу
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const startBtn = document.querySelector('button[data-start]');
-const dateTimePicker = document.querySelector('#datetime-picker');
 const daysContent = document.querySelector('span[data-days]');
 const hoursContent = document.querySelector('span[data-hours]');
 const minutesContent = document.querySelector('span[data-minutes]');
@@ -22,21 +22,17 @@ const options = {
   onClose(selectedDates) {
     const selectedTime = selectedDates[0].getTime();
 
-    let initialTime = options.defaultDate.getTime();
-    if (selectedTime < initialTime) {
-      alert('Please choose a date in the future');
+    if (selectedTime < options.defaultDate) {
+      Notify.failure('Please choose a date in the future');
     } else {
       startBtn.removeAttribute('disabled');
-      setInterval(() => {
-        let currentDate = new Date();
-        let currentTime = currentDate.getTime();
-        convertMs(selectedTime - currentTime);
-      }, 1000);
     }
   },
 };
 
-const fp = flatpickr(dateTimePicker, options);
+const fp = flatpickr('#datetime-picker', options);
+
+startBtn.addEventListener('click', updateTimer);
 
 function convertMs(ms) {
   // Number of milliseconds per unit of time
@@ -46,22 +42,32 @@ function convertMs(ms) {
   const day = hour * 24;
 
   // Remaining days
-  const days = Math.floor(ms / day);
+  const days = addLeadingZero(Math.floor(ms / day));
   // Remaining hours
-  const hours = Math.floor((ms % day) / hour);
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
   // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
   // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const seconds = addLeadingZero(
+    Math.floor((((ms % day) % hour) % minute) / second)
+  );
 
   return { days, hours, minutes, seconds };
 }
 
-function addLeadingZero(value) {}
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
 
-//Натисканням на кнопку «Start» починається відлік часу до обраної дати
-//з моменту натискання.
-
-// const str1 = '5';
-
-// console.log(str1.padStart(2, '0'));
+function updateTimer({ days, hours, minutes, seconds }) {
+  setInterval(() => {
+    let currentTime = Date.now();
+    let userTime = fp.selectedDates[0].getTime();
+    let timeDifference = userTime - currentTime;
+    const { days, hours, minutes, seconds } = convertMs(timeDifference);
+    daysContent.textContent = `${days}`;
+    hoursContent.textContent = `${hours}`;
+    minutesContent.textContent = `${minutes}`;
+    secondsContent.textContent = `${seconds}`;
+  }, 1000);
+}
