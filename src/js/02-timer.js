@@ -60,14 +60,18 @@ function addLeadingZero(value) {
 }
 
 function updateTimer({ days, hours, minutes, seconds }) {
-  setInterval(() => {
+  let timerId = setInterval(() => {
     let currentTime = Date.now();
     let userTime = fp.selectedDates[0].getTime();
     let timeDifference = userTime - currentTime;
-    const { days, hours, minutes, seconds } = convertMs(timeDifference);
-    daysContent.textContent = `${days}`;
-    hoursContent.textContent = `${hours}`;
-    minutesContent.textContent = `${minutes}`;
-    secondsContent.textContent = `${seconds}`;
+    if (timeDifference > 1) {
+      const { days, hours, minutes, seconds } = convertMs(timeDifference);
+      daysContent.textContent = `${days}`;
+      hoursContent.textContent = `${hours}`;
+      minutesContent.textContent = `${minutes}`;
+      secondsContent.textContent = `${seconds}`;
+    } else {
+      clearInterval(timerId);
+    }
   }, 1000);
 }
